@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Huffman
@@ -10,7 +11,7 @@ namespace Huffman
             IHuffmanBuilder builder = new HuffmanBuilder();
 
             StreamReader streamReader = builder.LoadFile(args[0]);
-            int[] charCount = builder.CountChars(streamReader);
+            List<Node> charCount = builder.CountChars(streamReader);
             builder.BuildTree(charCount);
             builder.OutputTreeInPrefix(Console.Out);
         }
@@ -19,8 +20,8 @@ namespace Huffman
     public interface IHuffmanBuilder
     {
         StreamReader LoadFile(string path);
-        int[] CountChars(StreamReader streamReader);
-        void BuildTree(int[] charCount);
+        List<Node> CountChars(StreamReader streamReader);
+        void BuildTree(List<Node> charCount);
         void OutputTreeInPrefix(TextWriter textWriter);
     }
 }

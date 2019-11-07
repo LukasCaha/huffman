@@ -2,7 +2,8 @@
   "profiles": {
     "Huffman": {
       "commandName": "Project",
-      "commandLineArgs": "soubor.txt"
+      "commandLineArgs": "binary.in > actualOutput.out",
+      "workingDirectory": "C:\\Users\\Lukas\\source\\repos\\Huffman\\Huffman\\bin\\Debug\\netcoreapp3.0"
     }
   }
 }
