@@ -9,8 +9,11 @@ namespace Huffman
         static void Main(string[] args)
         {
             IHuffmanBuilder builder = new HuffmanBuilder();
-
-            StreamReader streamReader = builder.LoadFile(args[0]);
+            if (args.Length < 1)
+            {
+                Console.WriteLine("Argument Error");
+            }
+            BinaryReader streamReader = builder.LoadFile(args[0]);
             List<Node> charCount = builder.CountChars(streamReader);
             builder.BuildTree(charCount);
             builder.OutputTreeInPrefix(Console.Out);
@@ -19,8 +22,8 @@ namespace Huffman
 
     public interface IHuffmanBuilder
     {
-        StreamReader LoadFile(string path);
-        List<Node> CountChars(StreamReader streamReader);
+        BinaryReader LoadFile(string path);
+        List<Node> CountChars(BinaryReader streamReader);
         void BuildTree(List<Node> charCount);
         void OutputTreeInPrefix(TextWriter textWriter);
     }

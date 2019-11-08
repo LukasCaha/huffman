@@ -22,59 +22,50 @@ namespace Huffman
             this.left = left;
             this.right = right;
         }
-
-        public int CompareTo(object obj)
-        {
-            int result = 1;
-            if (obj != null && obj is Node)
-            {
-                Node person = (Node)obj;
-                result = this.count.CompareTo(person.count);
-            }
-            return result;
-        }
     }
 
     public class HuffmanBuilder : IHuffmanBuilder
     {
-        public StreamReader LoadFile(string path)
+        public BinaryReader LoadFile(string path)
         {
             if (!File.Exists(path))
             {
                 Console.WriteLine("File Error");
                 Environment.Exit(0);
+                return null;
             }
 
-            return new StreamReader(path);
+            return new BinaryReader(File.Open(path, FileMode.Open));
         }
 
-        public List<Node> CountChars(StreamReader streamReader)
+        public List<Node> CountChars(BinaryReader streamReader)
         {
             List<Node> chars = new List<Node>();
-
-            while (!streamReader.EndOfStream)
+            using (streamReader)
             {
-                int newChar = streamReader.Read();
-                Node n = chars.Find(n => n.character.Equals(newChar));
-                if (n != null)
+                while (streamReader.BaseStream.Position != streamReader.BaseStream.Length)
                 {
-                    n.count++;
+                    int newChar = streamReader.ReadByte();
+                    Node n = chars.Find(n => n.character.Equals(newChar));
+                    if (n != null)
+                    {
+                        n.count++;
+                    }
+                    else
+                    {
+                        chars.Add(new Node(true, newChar, 1, null, null));
+                    }
                 }
-                else
-                {
-                    chars.Add(new Node(true, newChar, 1, null, null));
-                }
-            }
 
-            chars.Sort(delegate (Node n1, Node n2) { return n1.count.CompareTo(n2.count); });
-            return chars;
+                return chars;
+            }
         }
 
         List<Node> usedNodes = new List<Node>();
-
+        Node rootOfTree;
         public void BuildTree(List<Node> charCount)
         {
-
+            charCount = charCount.OrderBy(c => c.count).ThenByDescending(s => s.isChar).ThenBy(s => s.character).ToList();
             while (charCount.Count > 1)
             {
                 Node smallest = charCount[0];
@@ -90,8 +81,11 @@ namespace Huffman
 
                 Node merge = new Node(false, -1, smallest.count + secondSmallest.count, usedNodes[firstID], usedNodes[secondID]);
                 charCount.Add(merge);
-
-                charCount.Sort(delegate (Node n1, Node n2) { return n1.count.CompareTo(n2.count); });
+                if (charCount.Count==1)
+                {
+                    rootOfTree = merge;
+                }
+                charCount = charCount.OrderBy(c => c.count).ThenByDescending(s => s.isChar).ThenBy(s => s.character).ToList();
             }
             if (charCount.Count == 1)
             {
@@ -103,55 +97,54 @@ namespace Huffman
         {
             using (textWriter)
             {
-                Prefix(textWriter, usedNodes[usedNodes.Count - 1]);
+                Prefix(textWriter, rootOfTree,0);
             }
         }
-
-        public void Prefix(TextWriter tw, Node root)
+        bool first = true;
+        public void Prefix(TextWriter tw, Node root, int depth)
         {
             if (root.isChar)
             {
-                tw.Write("*"+(char)root.character + ":" + root.count+" ");
+                /*for (int i = 0; i < depth; i++)
+                {
+                    tw.Write(" ");
+                }*/
+                if (first)
+                {
+                    tw.Write("*" + root.character + ":" + root.count);
+                    first = false;
+                }
+                else
+                {
+                    tw.Write(" *" + root.character + ":" + root.count);
+                }
             }
             else
             {
-                tw.Write(root.count + " ");
-            }
-            if (root.left != null) { Prefix(tw, root.left); }
-            if (root.right != null) { Prefix(tw, root.right); }
-        }
-
-        public static void InsertionSort<T>(IList<T> list, Comparison<T> comparison)
-        {
-            if (list == null)
-                throw new ArgumentNullException("list");
-            if (comparison == null)
-                throw new ArgumentNullException("comparison");
-
-            int count = list.Count;
-            for (int j = 1; j < count; j++)
-            {
-                T key = list[j];
-
-                int i = j - 1;
-                for (; i >= 0 && comparison(list[i], key) > 0; i--)
+                //tw.WriteLine();
+                /*for (int i = 0; i < depth; i++)
                 {
-                    list[i + 1] = list[i];
+                    if (i%2==0)
+                    {
+                        tw.Write("|");
+                    }
+                    else
+                    {
+                        tw.Write(" ");
+                    }
+                }*/
+                if (first)
+                {
+                    tw.Write(root.count);
+                    first = false;
                 }
-                list[i + 1] = key;
+                else
+                {
+                    tw.Write(" " + root.count);
+                }
             }
-        }
-        static public int Compare(Node x, Node y)
-        {
-            int result = 1;
-            if (x != null && x is Node &&
-                y != null && y is Node)
-            {
-                Node personX = (Node)x;
-                Node personY = (Node)y;
-                result = personX.CompareTo(personY);
-            }
-            return result;
+            if (root.left != null) { Prefix(tw, root.left, depth+1); }
+            if (root.right != null) { Prefix(tw, root.right, depth + 1); }
         }
     }
 }

@@ -2,7 +2,7 @@
   "profiles": {
     "Huffman": {
       "commandName": "Project",
-      "commandLineArgs": "binary.in > actualOutput.out",
+      "commandLineArgs": "simple.in > actualOutput.out",
       "workingDirectory": "C:\\Users\\Lukas\\source\\repos\\Huffman\\Huffman\\bin\\Debug\\netcoreapp3.0"
     }
   }
